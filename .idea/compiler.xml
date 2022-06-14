@@ -10,8 +10,5 @@
         <module name="LeeJerry.main" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="LeeJerry" target="11" />
-    </bytecodeTargetLevel>
   </component>
 </project>
