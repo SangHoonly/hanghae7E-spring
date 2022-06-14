@@ -21,7 +21,9 @@ public class UserController {
 
 
     @PostMapping ("/api/register")
-    ResponseEntity<String> registerUser(@RequestBody UserReq userReq) {
+    ResponseEntity<String> registerUser(@RequestBody UserReq userReq, Authentication authentication) {
+        if (authentication != null) throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+
         userService.registerUser(userReq);
 
         return new ResponseEntity<>("회원가입 성공", HttpStatus.OK);
@@ -29,7 +31,7 @@ public class UserController {
 
     @PostMapping("/api/login")
     String login(@RequestBody UserReq userReq, Authentication authentication) {
-        if (authentication.isAuthenticated()) throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        if (authentication != null) throw new ResponseStatusException(HttpStatus.FORBIDDEN);
 
         return userService.login(userReq);
     }
