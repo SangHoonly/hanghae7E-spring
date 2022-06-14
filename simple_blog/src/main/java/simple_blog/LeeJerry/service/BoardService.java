@@ -12,6 +12,10 @@ import simple_blog.LeeJerry.dto.BoardReq;
 import simple_blog.LeeJerry.dto.BoardRes;
 import simple_blog.LeeJerry.entity.Board;
 import simple_blog.LeeJerry.auth.UserProxy;
+import simple_blog.LeeJerry.exception.AbstractException;
+import simple_blog.LeeJerry.exception.ErrorCode;
+import simple_blog.LeeJerry.exception.NotFoundException;
+import simple_blog.LeeJerry.exception.UnAuthorizedException;
 import simple_blog.LeeJerry.repository.BoardRepository;
 
 @Service
@@ -27,21 +31,28 @@ public class BoardService {
         return boardRepository.findAll().stream().map(BoardRes::toRes).collect(toList());
     }
 
-    @Transactional
-    public void insertBoard(BoardReq boardReq, Authentication authentication) {
-        UserProxy userProxy = (UserProxy) authentication.getPrincipal();
-
-        boardRepository.save(boardReq.toEntity(userProxy.getUser()));
+    public BoardRes findBoard(Long boardId) throws NotFoundException {
+        return BoardRes.toRes(
+            boardRepository.findById(boardId).orElseThrow(() -> new NotFoundException(ErrorCode.BOARD_NOT_FOUND)));
     }
 
     @Transactional
-    public void updateBoard(BoardReq boardReq, Authentication authentication) {
+    Board findBoardEntity(Long boardId) throws NotFoundException {
+        return boardRepository.findById(boardId).orElseThrow(() -> new NotFoundException(ErrorCode.BOARD_NOT_FOUND));
+    }
+
+    @Transactional
+    public void insertBoard(BoardReq boardReq) {
+
+        boardRepository.save(boardReq.toEntity());
+    }
+
+    @Transactional
+    public void updateBoard(BoardReq boardReq, Authentication authentication) throws AbstractException {
         UserProxy userProxy = (UserProxy) authentication.getPrincipal();
+        Board board = findBoardEntity(boardReq.getId());
 
-        Board board = boardRepository.findById(boardReq.getId())
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "해당 게시글이 존재하지 않습니다."));
-
-        if (board.getUserEntity().getId() != userProxy.getId()) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "해당 게시글의 작성자가 아닙니다.");
+        if (board.getUserEntity().getId() != userProxy.getId()) throw new UnAuthorizedException(ErrorCode.NOT_AUTHOR);
 
 
         board.update(boardReq.getBody(), boardReq.getTitle());
@@ -50,11 +61,11 @@ public class BoardService {
     }
 
     @Transactional
-    public void deleteBoard(Long boardId, Authentication authentication) {
-        Board board = boardRepository.findById(boardId).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "해당 보드가 존재하지 않습니다."));
+    public void deleteBoard(Long boardId, Authentication authentication) throws AbstractException {
         UserProxy userProxy = (UserProxy) authentication.getPrincipal();
+        Board board = findBoardEntity(boardId);
 
-        if (board.getUserEntity().getId() != userProxy.getId()) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "해당 게시글의 작성자가 아닙니다.");
+        if (board.getUserEntity().getId() != userProxy.getId()) throw new UnAuthorizedException(ErrorCode.NOT_AUTHOR);
 
         boardRepository.deleteById(boardId);
     }

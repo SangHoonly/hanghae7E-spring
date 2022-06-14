@@ -25,8 +25,9 @@ public class BoardReq {
 
     private Integer view_count;
 
+    private UserEntity userEntity;
 
-    public Board toEntity(UserEntity userEntity) {
+    public Board toEntity() {
         if (title.equals("")) throw new InvalidParameterException("Board.title is null");
         if (body.equals("")) throw new InvalidParameterException("Board.body is null");
 

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import simple_blog.LeeJerry.auth.UserProxy;
 import simple_blog.LeeJerry.dto.BoardReq;
 import simple_blog.LeeJerry.dto.BoardRes;
 import simple_blog.LeeJerry.service.BoardService;
@@ -33,12 +34,16 @@ public class BoardController {
 
     @PostMapping
     public void insertBoard(@RequestBody BoardReq boardReq, Authentication authentication) {
-        boardService.insertBoard(boardReq, authentication);
+        UserProxy userProxy = (UserProxy) authentication.getPrincipal();
+        boardReq.setUserEntity(userProxy.getUser());
+
+        boardService.insertBoard(boardReq);
     }
 
     @PutMapping("/{boardId}")
-    public void updateBoard(
-        @RequestBody BoardReq boardReq, Authentication authentication, @PathVariable Long boardId) {
+    public void updateBoard(@RequestBody BoardReq boardReq, Authentication authentication, @PathVariable Long boardId) {
+        UserProxy userProxy = (UserProxy) authentication.getPrincipal();
+
         boardReq.setId(boardId);
         boardService.updateBoard(boardReq, authentication);
     }
