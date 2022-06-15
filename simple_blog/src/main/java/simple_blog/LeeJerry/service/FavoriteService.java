@@ -1,14 +1,15 @@
 package simple_blog.LeeJerry.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 import simple_blog.LeeJerry.auth.UserProxy;
 import simple_blog.LeeJerry.entity.Board;
 import simple_blog.LeeJerry.entity.FavoriteEntity;
 import simple_blog.LeeJerry.entity.UserEntity;
+import simple_blog.LeeJerry.exception.AbstractException;
+import simple_blog.LeeJerry.exception.ErrorCode;
+import simple_blog.LeeJerry.exception.InvalidException;
+import simple_blog.LeeJerry.exception.NotFoundException;
 import simple_blog.LeeJerry.repository.BoardRepository;
 import simple_blog.LeeJerry.repository.FavoriteRepository;
 import simple_blog.LeeJerry.repository.UserRepository;
@@ -22,21 +23,21 @@ public class FavoriteService {
     final FavoriteRepository favoriteRepository;
 
 
-    public void updateFavorite(Long boardId, Authentication authentication) {
-        UserProxy userProxy = (UserProxy) authentication.getPrincipal();
+    public void insertFavorite(Long boardId, UserProxy userProxy) throws AbstractException {
+        UserEntity userEntity = userRepository.findById(userProxy.getId()).orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
+        Board board = boardRepository.findById(boardId).orElseThrow(() -> new NotFoundException(ErrorCode.BOARD_NOT_FOUND));
 
-        if (userProxy == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        if (favoriteRepository.findByBoardIdAndUserEntityId(boardId, userProxy.getId()).isPresent()) throw new InvalidException(ErrorCode.FAVORITE_ALREADY_EXIST);
 
-        Board board = boardRepository.findById(boardId).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
-        UserEntity userEntity = userRepository.findById(userProxy.getId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
-
-        FavoriteEntity favoriteEntity = favoriteRepository.findByBoardIdAndUserEntityId(board.getId(), userEntity.getId())
-                                                .orElse(FavoriteEntity.builder().board(board).userEntity(userEntity).build());
-
-        if (favoriteEntity.getId() != null) favoriteEntity.update();
-
-
+        FavoriteEntity favoriteEntity = FavoriteEntity.builder().userEntity(userEntity).board(board).build();
 
         favoriteRepository.save(favoriteEntity);
+
+    }
+
+    public void deleteFavorite(Long boardId, UserProxy userProxy) throws AbstractException {
+        FavoriteEntity favoriteEntity = favoriteRepository.findByBoardIdAndUserEntityId(boardId, userProxy.getId()).orElseThrow(() -> new NotFoundException(ErrorCode.FAVORITE_NOT_FOUND));
+
+        favoriteRepository.delete(favoriteEntity);
     }
 }

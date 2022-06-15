@@ -22,6 +22,10 @@ public class BoardRes {
 
     private String body;
 
+    private String imageUrl;
+
+    private Integer favoriteCnt;
+
     private Integer view_count;
 
     private Date created_date;
@@ -35,9 +39,24 @@ public class BoardRes {
                     .user_id(board.getUserEntity().getId())
                     .title(board.getTitle())
                     .body(board.getBody())
+                    .favoriteCnt(board.getFavorites().size())
                     .view_count(board.getView_count())
                     .created_date(board.getCreated_date())
                     .modified_date(board.getModified_date())
                     .build();
+    }
+
+    public static BoardRes toRes(Board board, String imageUrl) {
+        return BoardRes.builder().
+            id(board.getId())
+            .user_id(board.getUserEntity().getId())
+            .title(board.getTitle())
+            .body(board.getBody())
+            .imageUrl(imageUrl)
+            .favoriteCnt(board.getFavorites().size())
+            .view_count(board.getView_count())
+            .created_date(board.getCreated_date())
+            .modified_date(board.getModified_date())
+            .build();
     }
 }

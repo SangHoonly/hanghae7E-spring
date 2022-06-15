@@ -13,3 +13,6 @@ spring:
 
 jwt:
   secret: ${SECRET_KEY}
+
+url:
+  server: ${SERVER_URL}

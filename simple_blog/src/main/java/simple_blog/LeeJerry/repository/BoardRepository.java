@@ -7,4 +7,5 @@ import simple_blog.LeeJerry.entity.Board;
 
 @Repository
 public interface BoardRepository extends JpaRepository<Board, Long> {
+
 }
