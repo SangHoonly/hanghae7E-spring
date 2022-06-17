@@ -13,8 +13,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import simple_blog.LeeJerry.auth.UserProxy;
-import simple_blog.LeeJerry.dto.BoardReqTemplate;
+import simple_blog.LeeJerry.dto.BoardReq;
 import simple_blog.LeeJerry.dto.BoardRes;
+import simple_blog.LeeJerry.exception.AbstractException;
 import simple_blog.LeeJerry.service.BoardService;
 
 @RestController
@@ -22,6 +23,7 @@ import simple_blog.LeeJerry.service.BoardService;
 public class BoardController {
 
     BoardService boardService;
+
 
     public BoardController(BoardService boardService) {
         this.boardService = boardService;
@@ -38,15 +40,15 @@ public class BoardController {
     }
 
     @PostMapping
-    public void insertBoard(@RequestBody BoardReqTemplate boardReq, @AuthenticationPrincipal UserProxy userProxy)
-        throws IOException {
+    public void insertBoard(BoardReq boardReq, @AuthenticationPrincipal UserProxy userProxy) throws IOException {
         boardReq.setUserEntity(userProxy.getUser());
 
         boardService.insertBoard(boardReq);
     }
 
     @PutMapping("/{boardId}")
-    public void updateBoard(@RequestBody BoardReqTemplate boardReq, @AuthenticationPrincipal UserProxy userProxy, @PathVariable Long boardId) {
+    public void updateBoard(@RequestBody BoardReq boardReq, @AuthenticationPrincipal UserProxy userProxy, @PathVariable Long boardId)
+        throws AbstractException, IOException {
         boardReq.setId(boardId);
         boardService.updateBoard(boardReq, userProxy.getId());
     }

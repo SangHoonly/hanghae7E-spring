@@ -1,7 +1,6 @@
 package simple_blog.LeeJerry.dto;
 
-import java.sql.Timestamp;
-import java.util.Date;
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,7 +15,7 @@ public class BoardRes {
 
     private Long id;
 
-    private Long user_id;
+    private Long userId;
 
     private String title;
 
@@ -24,39 +23,23 @@ public class BoardRes {
 
     private String imageUrl;
 
-    private Integer favoriteCnt;
+    private Integer viewCount;
 
-    private Integer view_count;
+    private LocalDateTime createdDate;
 
-    private Date created_date;
-
-    private Date modified_date;
+    private LocalDateTime modifiedDate;
 
 
     public static BoardRes toRes(Board board) {
         return BoardRes.builder().
-                    id(board.getId())
-                    .user_id(board.getUserEntity().getId())
-                    .title(board.getTitle())
-                    .body(board.getBody())
-                    .favoriteCnt(board.getFavorites().size())
-                    .view_count(board.getView_count())
-                    .created_date(board.getCreated_date())
-                    .modified_date(board.getModified_date())
-                    .build();
-    }
-
-    public static BoardRes toRes(Board board, String imageUrl) {
-        return BoardRes.builder().
             id(board.getId())
-            .user_id(board.getUserEntity().getId())
+            .userId(board.getUserEntity().getId())
             .title(board.getTitle())
             .body(board.getBody())
-            .imageUrl(imageUrl)
-            .favoriteCnt(board.getFavorites().size())
-            .view_count(board.getView_count())
-            .created_date(board.getCreated_date())
-            .modified_date(board.getModified_date())
+            .imageUrl(board.getImageUrl())
+            .viewCount(board.getViewCount())
+            .createdDate(board.getCreatedDate())
+            .modifiedDate(board.getModifiedDate())
             .build();
     }
 }

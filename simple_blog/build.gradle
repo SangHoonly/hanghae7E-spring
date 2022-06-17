@@ -23,6 +23,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-jdbc'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
+
 	implementation 'io.jsonwebtoken:jjwt:0.9.1'
 	implementation 'com.google.code.gson:gson:2.9.0'
 	runtimeOnly 'mysql:mysql-connector-java'

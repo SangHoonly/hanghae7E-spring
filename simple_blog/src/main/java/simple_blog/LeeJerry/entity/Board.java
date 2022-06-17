@@ -1,9 +1,8 @@
 package simple_blog.LeeJerry.entity;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
@@ -14,7 +13,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,6 +23,7 @@ import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import simple_blog.LeeJerry.dto.BoardReq;
 
 @Entity
 @Getter
@@ -46,8 +45,6 @@ public class Board {
     @JoinColumn(name = "USER_ID")
     private UserEntity userEntity;
 
-    @OneToOne(mappedBy = "board", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
-    private ImageEntity imageEntity;
 
     @OneToMany(mappedBy = "board", fetch = FetchType.LAZY)
     private List <FavoriteEntity> favorites = new ArrayList<>();
@@ -56,26 +53,37 @@ public class Board {
 
     private String body;
 
-    private Integer view_count = 0;
+    @Column(name = "VIEW_COUNT")
+    private Integer viewCount = 0;
 
+    @Column(name = "FAVORITE_COUNT")
+    private Integer favoriteCount = 0;
+
+    @Column(name = "IMAGE_URL")
+    private String imageUrl;
+
+    @Column(name = "CREATED_DATE")
     @CreatedDate
-    private Date created_date;
+    private LocalDateTime createdDate;
 
+    @Column(name = "MODIFIED_DATE")
     @LastModifiedDate
-    private Date modified_date;
+    private LocalDateTime modifiedDate;
 
     public void viewed() {
-        this.view_count++;
+        this.viewCount++;
     }
 
-    public void update(String title, String body) {
-        this.title = title;
-        this.body = body;
+    public void increseFavorite() {this.favoriteCount++;}
+
+    public void decreseFavorite() {this.favoriteCount--;}
+
+    public void updateTitleAndBody(BoardReq boardReq) {
+        this.title = boardReq.getTitle() != null ? boardReq.getTitle() : title;
+        this.body = boardReq.getBody() != null ? boardReq.getBody() : body;
     }
 
-    public void update(String title, String body, ImageEntity imageEntity) {
-        this.title = title;
-        this.body = body;
-        this.imageEntity = imageEntity;
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 }
