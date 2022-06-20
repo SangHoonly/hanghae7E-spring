@@ -1,25 +1,28 @@
 package simple_blog.LeeJerry.entity;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Getter
-@Builder
-@AllArgsConstructor
+@EntityListeners(AuditingEntityListener.class)
+@DynamicUpdate
+@DynamicInsert
 @NoArgsConstructor
 @Table(name = "USERS")
 public class UserEntity {
@@ -34,9 +37,18 @@ public class UserEntity {
 
     private String password;
 
-    @Temporal(TemporalType.TIMESTAMP) @CreationTimestamp
-    private Date created_date;
+    @Column(name = "CREATED_DATE")
+    @CreatedDate
+    private LocalDateTime createdDate;
 
-    @Temporal(TemporalType.TIMESTAMP) @UpdateTimestamp
-    private Date modified_date;
+    @Column(name = "MODIFIED_DATE")
+    @LastModifiedDate
+    private LocalDateTime modifiedDate;
+
+    @Builder
+    public UserEntity(String email, String username, String password) {
+        this.email = email;
+        this.username = username;
+        this.password = password;
+    }
 }

@@ -1,6 +1,6 @@
 package simple_blog.LeeJerry.entity;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
@@ -23,12 +23,10 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Getter
-@AllArgsConstructor
 @NoArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
 @DynamicUpdate
 @DynamicInsert
-@Builder
 @Table(name = "FAVORITES")
 public class FavoriteEntity {
 
@@ -40,12 +38,19 @@ public class FavoriteEntity {
     private UserEntity userEntity;
 
     @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "BOARD_ID")
-    private Board board;
+    private BoardEntity boardEntity;
 
+    @Column(name = "CREATED_DATE")
     @CreatedDate
-    private Date created_date;
+    private LocalDateTime createdDate;
 
+    @Column(name = "MODIFIED_DATE")
     @LastModifiedDate
-    private Date modified_date;
+    private LocalDateTime modifiedDate;
 
+    @Builder
+    public FavoriteEntity(UserEntity userEntity, BoardEntity boardEntity) {
+        this.userEntity = userEntity;
+        this.boardEntity = boardEntity;
+    }
 }

@@ -6,13 +6,12 @@ import java.util.Objects;
 import lombok.Builder;
 import lombok.Getter;
 import org.springframework.web.multipart.MultipartFile;
-import simple_blog.LeeJerry.entity.Board;
+import simple_blog.LeeJerry.entity.BoardEntity;
 import simple_blog.LeeJerry.entity.UserEntity;
 import simple_blog.LeeJerry.exception.AbstractException;
 import simple_blog.LeeJerry.exception.ErrorCode;
 import simple_blog.LeeJerry.exception.InvalidException;
 
-@Builder
 @Getter
 public class BoardReq {
     private Long id;
@@ -25,6 +24,7 @@ public class BoardReq {
 
     private final MultipartFile files;
 
+    @Builder
     public BoardReq(MultipartFile files, String title, String body) {
         this.files = files;
         this.title = title;
@@ -47,10 +47,10 @@ public class BoardReq {
         this.userEntity = userEntity;
     }
 
-    public Board toEntity() {
+    public BoardEntity toEntity() {
         if (!validate()) throw new InvalidException(ErrorCode.INVALID_BOARD_REQ);
 
-        return Board.builder()
+        return BoardEntity.builder()
             .id(id)
             .userEntity(userEntity)
             .title(this.title)

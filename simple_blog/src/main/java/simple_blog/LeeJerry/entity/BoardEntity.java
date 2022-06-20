@@ -1,8 +1,6 @@
 package simple_blog.LeeJerry.entity;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
@@ -12,12 +10,11 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.data.annotation.CreatedDate;
@@ -27,14 +24,12 @@ import simple_blog.LeeJerry.dto.BoardReq;
 
 @Entity
 @Getter
-@Builder
 @DynamicInsert
 @DynamicUpdate
 @EntityListeners(AuditingEntityListener.class)
-@AllArgsConstructor
-@NoArgsConstructor
 @Table(name = "BOARDS")
-public class Board {
+@NoArgsConstructor
+public class BoardEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -45,19 +40,17 @@ public class Board {
     @JoinColumn(name = "USER_ID")
     private UserEntity userEntity;
 
-
-    @OneToMany(mappedBy = "board", fetch = FetchType.LAZY)
-    private List <FavoriteEntity> favorites = new ArrayList<>();
-
     private String title;
 
     private String body;
 
     @Column(name = "VIEW_COUNT")
-    private Integer viewCount = 0;
+    @ColumnDefault("0")
+    private Integer viewCount;
 
     @Column(name = "FAVORITE_COUNT")
-    private Integer favoriteCount = 0;
+    @ColumnDefault("0")
+    private Integer favoriteCount;
 
     @Column(name = "IMAGE_URL")
     private String imageUrl;
@@ -70,13 +63,24 @@ public class Board {
     @LastModifiedDate
     private LocalDateTime modifiedDate;
 
+    @Builder
+    public BoardEntity(Long id, UserEntity userEntity, String title, String body, Integer viewCount, Integer favoriteCount, String imageUrl) {
+        this.id = id;
+        this.userEntity = userEntity;
+        this.title = title;
+        this.body = body;
+        this.viewCount = viewCount;
+        this.favoriteCount = favoriteCount;
+        this.imageUrl = imageUrl;
+    }
+
     public void viewed() {
         this.viewCount++;
     }
 
-    public void increseFavorite() {this.favoriteCount++;}
+    public void increaseFavorite() {this.favoriteCount++;}
 
-    public void decreseFavorite() {this.favoriteCount--;}
+    public void decreaseFavorite() {this.favoriteCount--;}
 
     public void updateTitleAndBody(BoardReq boardReq) {
         this.title = boardReq.getTitle() != null ? boardReq.getTitle() : title;

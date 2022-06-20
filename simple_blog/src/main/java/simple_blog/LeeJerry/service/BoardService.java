@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import simple_blog.LeeJerry.dto.BoardReq;
 import simple_blog.LeeJerry.dto.BoardRes;
-import simple_blog.LeeJerry.entity.Board;
+import simple_blog.LeeJerry.entity.BoardEntity;
 import simple_blog.LeeJerry.exception.AbstractException;
 import simple_blog.LeeJerry.exception.ErrorCode;
 import simple_blog.LeeJerry.exception.NotFoundException;
@@ -44,52 +44,51 @@ public class BoardService {
     @Transactional
     public BoardRes findBoard(Long boardId) throws NotFoundException {
         
-        Board board = boardRepository.findById(boardId).orElseThrow(() -> new NotFoundException(ErrorCode.BOARD_NOT_FOUND));
+        BoardEntity boardEntity = boardRepository.findById(boardId).orElseThrow(() -> new NotFoundException(ErrorCode.BOARD_NOT_FOUND));
+        boardEntity.viewed();
 
-        board.viewed();
-
-        return BoardRes.toRes(board);
+        return BoardRes.toRes(boardEntity);
     }
 
-    Board findBoardEntity(Long boardId) throws NotFoundException {
+    BoardEntity findBoardEntity(Long boardId) throws NotFoundException {
         return boardRepository.findById(boardId).orElseThrow(() -> new NotFoundException(ErrorCode.BOARD_NOT_FOUND));
     }
 
     @Transactional
     public void insertBoard(BoardReq boardReq) throws IOException {
-        Board board = boardRepository.save(boardReq.toEntity());
-        sendMultipartImageToS3(boardReq.getFiles(), board.getId());
+        BoardEntity boardEntity = boardRepository.save(boardReq.toEntity());
+        sendMultipartImageToS3(boardReq.getFiles(), boardEntity.getId());
 
-        String imageUrl = amazonS3Client.getUrl(BUCKET_NAME, toS3Key(board.getId())).toString();
+        String imageUrl = amazonS3Client.getUrl(BUCKET_NAME, toS3Key(boardEntity.getId())).toString();
 
-        board.setImageUrl(imageUrl);
+        boardEntity.setImageUrl(imageUrl);
     }
 
     @Transactional
     public void updateBoard(BoardReq boardReq, Long currentUserId) throws AbstractException, IOException {
-        Board board = findBoardEntity(boardReq.getId());
+        BoardEntity boardEntity = findBoardEntity(boardReq.getId());
 
-        if (board.getUserEntity().getId() != currentUserId) throw new UnAuthorizedException(ErrorCode.NOT_AUTHOR);
+        if (boardEntity.getUserEntity().getId() != currentUserId) throw new UnAuthorizedException(ErrorCode.NOT_AUTHOR);
 
-        board.updateTitleAndBody(boardReq);
+        boardEntity.updateTitleAndBody(boardReq);
 
         if (boardReq.getFiles() != null) {
-            amazonS3Client.deleteObject(BUCKET_NAME, board.getId().toString());
+            amazonS3Client.deleteObject(BUCKET_NAME, boardEntity.getId().toString());
 
-            sendMultipartImageToS3(boardReq.getFiles(), board.getId());
-            String imageUrl = amazonS3Client.getUrl(BUCKET_NAME, toS3Key(board.getId())).toString();
-            board.setImageUrl(imageUrl);
+            sendMultipartImageToS3(boardReq.getFiles(), boardEntity.getId());
+            String imageUrl = amazonS3Client.getUrl(BUCKET_NAME, toS3Key(boardEntity.getId())).toString();
+            boardEntity.setImageUrl(imageUrl);
         }
 
-        boardRepository.save(board);
+        boardRepository.save(boardEntity);
     }
 
     @Transactional
     public void deleteBoard(Long boardId, Long currentUserId) throws AbstractException {
-        Board board = findBoardEntity(boardId);
+        BoardEntity boardEntity = findBoardEntity(boardId);
         amazonS3Client.deleteObject(BUCKET_NAME, toS3Key(boardId));
 
-        if (board.getUserEntity().getId() != currentUserId) throw new UnAuthorizedException(ErrorCode.NOT_AUTHOR);
+        if (boardEntity.getUserEntity().getId() != currentUserId) throw new UnAuthorizedException(ErrorCode.NOT_AUTHOR);
 
         boardRepository.deleteById(boardId);
     }
@@ -100,7 +99,7 @@ public class BoardService {
         objectMetadata.setContentLength(multipartFile.getSize());
         objectMetadata.setContentType("image/jpeg");
 
-        amazonS3Client.putObject(new PutObjectRequest(BUCKET_NAME, toS3Key(boardId),  multipartFile.getInputStream(), new ObjectMetadata()));
+        amazonS3Client.putObject(new PutObjectRequest(BUCKET_NAME, toS3Key(boardId),  multipartFile.getInputStream(), objectMetadata));
     }
 
     public String toS3Key(Long boardId) {

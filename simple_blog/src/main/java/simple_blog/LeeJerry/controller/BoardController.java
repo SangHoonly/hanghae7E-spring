@@ -20,7 +20,7 @@ import simple_blog.LeeJerry.service.BoardService;
 
 @RestController
 @RequestMapping("/api/board")
-public class BoardController {
+public class     BoardController {
 
     BoardService boardService;
 

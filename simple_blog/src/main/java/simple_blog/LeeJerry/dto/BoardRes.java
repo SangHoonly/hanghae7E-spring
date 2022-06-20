@@ -1,15 +1,12 @@
 package simple_blog.LeeJerry.dto;
 
 import java.time.LocalDateTime;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import simple_blog.LeeJerry.entity.Board;
+import simple_blog.LeeJerry.entity.BoardEntity;
 
 @Getter
-@Builder
-@AllArgsConstructor
 @NoArgsConstructor
 public class BoardRes {
 
@@ -25,21 +22,38 @@ public class BoardRes {
 
     private Integer viewCount;
 
+    private Integer favoriteCount;
+
     private LocalDateTime createdDate;
 
     private LocalDateTime modifiedDate;
 
+    @Builder
+    public BoardRes(Long id, Long userId, String title, String body, String imageUrl,
+        Integer viewCount, Integer favoriteCount, LocalDateTime createdDate, LocalDateTime modifiedDate) {
+        this.id = id;
+        this.userId = userId;
+        this.title = title;
+        this.body = body;
+        this.imageUrl = imageUrl;
+        this.viewCount = viewCount;
+        this.favoriteCount = favoriteCount;
+        this.createdDate = createdDate;
+        this.modifiedDate = modifiedDate;
+    }
 
-    public static BoardRes toRes(Board board) {
+
+    public static BoardRes toRes(BoardEntity boardEntity) {
         return BoardRes.builder().
-            id(board.getId())
-            .userId(board.getUserEntity().getId())
-            .title(board.getTitle())
-            .body(board.getBody())
-            .imageUrl(board.getImageUrl())
-            .viewCount(board.getViewCount())
-            .createdDate(board.getCreatedDate())
-            .modifiedDate(board.getModifiedDate())
+            id(boardEntity.getId())
+            .userId(boardEntity.getUserEntity().getId())
+            .title(boardEntity.getTitle())
+            .body(boardEntity.getBody())
+            .imageUrl(boardEntity.getImageUrl())
+            .viewCount(boardEntity.getViewCount())
+            .favoriteCount(boardEntity.getFavoriteCount())
+            .createdDate(boardEntity.getCreatedDate())
+            .modifiedDate(boardEntity.getModifiedDate())
             .build();
     }
 }
