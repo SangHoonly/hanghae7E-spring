@@ -22,6 +22,7 @@ public class FavoriteController {
     void insertFavorite(@PathVariable Long boardId, @AuthenticationPrincipal UserProxy userProxy) {
         favoriteService.insertFavorite(boardId, userProxy);
     }
+
     @DeleteMapping("/api/board/{boardId}/favorite")
     void deleteFavorite(@PathVariable Long boardId, @AuthenticationPrincipal UserProxy userProxy) {
         favoriteService.deleteFavorite(boardId, userProxy);

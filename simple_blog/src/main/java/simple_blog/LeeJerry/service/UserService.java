@@ -27,7 +27,6 @@ public class UserService {
     @Transactional
     public void registerUser(UserReq userReq) throws InvalidException {
         if (userRepository.existsByEmail(userReq.getEmail())) throw new InvalidException(ErrorCode.USER_ALREADY_EXISTS);
-        if (userReq.getUsername() == null) throw new InvalidException(ErrorCode.INVALID_REGISTER_USERNAME);
         UserEntity user = userReq.toEntity();
         userRepository.save(user);
     }

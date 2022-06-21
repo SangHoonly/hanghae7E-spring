@@ -36,8 +36,8 @@ public class BoardService {
     @Value("${cloud.aws.s3.bucket}")
     private String BUCKET_NAME;
 
-    public List<BoardRes> getBoards() {
-        return boardRepository.findAll(Sort.by(Direction.ASC, "favoriteCount"))
+    public List<BoardRes> findBoards() {
+        return boardRepository.findAll(Sort.by(Direction.DESC, "favoriteCount"))
             .stream().map(BoardRes::toRes).collect(toList());
     }
 

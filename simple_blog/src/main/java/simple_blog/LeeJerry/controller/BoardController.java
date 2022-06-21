@@ -15,15 +15,15 @@ import org.springframework.web.bind.annotation.RestController;
 import simple_blog.LeeJerry.auth.UserProxy;
 import simple_blog.LeeJerry.dto.BoardReq;
 import simple_blog.LeeJerry.dto.BoardRes;
+import simple_blog.LeeJerry.entity.UserEntity;
 import simple_blog.LeeJerry.exception.AbstractException;
 import simple_blog.LeeJerry.service.BoardService;
 
 @RestController
 @RequestMapping("/api/board")
-public class     BoardController {
+public class BoardController {
 
     BoardService boardService;
-
 
     public BoardController(BoardService boardService) {
         this.boardService = boardService;
@@ -31,7 +31,7 @@ public class     BoardController {
 
     @GetMapping
     public List<BoardRes> getBoards() {
-        return boardService.getBoards();
+        return boardService.findBoards();
     }
 
     @GetMapping("/{boardId}")
@@ -41,7 +41,9 @@ public class     BoardController {
 
     @PostMapping
     public void insertBoard(BoardReq boardReq, @AuthenticationPrincipal UserProxy userProxy) throws IOException {
-        boardReq.setUserEntity(userProxy.getUser());
+        UserEntity userEntity = userProxy.getUser();
+
+        boardReq.setUserEntity(userEntity);
 
         boardService.insertBoard(boardReq);
     }

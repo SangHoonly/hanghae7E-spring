@@ -30,6 +30,7 @@ public class UserController {
 
         if (!Pattern.matches(emailPattern, userReq.getEmail())) throw new InvalidException(ErrorCode.INVALID_REGISTER_EMAIL);
         if (!Pattern.matches(passwordPattern, userReq.getPassword())) throw new InvalidException(ErrorCode.INVALID_REGISTER_PASSWORD);
+        if (userReq.getUsername() == null) throw new InvalidException(ErrorCode.INVALID_REGISTER_USERNAME);
 
         userService.registerUser(userReq);
     }
