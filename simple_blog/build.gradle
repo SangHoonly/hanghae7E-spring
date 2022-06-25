@@ -2,6 +2,7 @@ plugins {
 	id 'org.springframework.boot' version '2.7.0'
 	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
 	id 'java'
+	id 'jacoco'
 }
 
 group = 'simple_blog'
@@ -16,6 +17,10 @@ configurations {
 
 repositories {
 	mavenCentral()
+}
+
+jacoco {
+	toolVersion = "0.8.5"
 }
 
 dependencies {
@@ -36,4 +41,40 @@ dependencies {
 
 tasks.withType(Test) {
 	useJUnitPlatform()
+	finalizedBy 'jacocoTestReport'
+}
+
+jacocoTestReport {
+	reports {
+		html.enabled true
+		xml.enabled false
+	}
+
+	afterEvaluate {
+		classDirectories.setFrom(files(classDirectories.files.collect {
+			fileTree(dir: it, excludes: [
+					'**/dto',
+					'**/auth',
+					'**/entity',
+					'**/config',
+					'**/exception',
+					'**/*Application.class'
+			])
+		}))
+
+	finalizedBy 'jacocoTestCoverageVerification'
+}
+
+jacocoTestCoverageVerification {
+	violationRules( {
+		rule {
+			element = 'CLASS'
+
+			limit {
+				counter = 'LINE'
+				value = 'COVEREDRATIO'
+				minimum = 1.0
+			}
+		}
+	})}
 }

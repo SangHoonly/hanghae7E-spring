@@ -7,6 +7,7 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import javax.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -43,20 +44,30 @@ public class BoardService {
 
     @Transactional
     public BoardRes findBoard(Long boardId) throws NotFoundException {
-        
-        BoardEntity boardEntity = boardRepository.findById(boardId).orElseThrow(() -> new NotFoundException(ErrorCode.BOARD_NOT_FOUND));
+        Optional<BoardEntity> optionalBoard = boardRepository.findById(boardId);
+
+        if (optionalBoard.isEmpty()) throw new NotFoundException(ErrorCode.BOARD_NOT_FOUND);
+        BoardEntity boardEntity = optionalBoard.get();
+
         boardEntity.viewed();
 
         return BoardRes.toRes(boardEntity);
     }
 
     BoardEntity findBoardEntity(Long boardId) throws NotFoundException {
-        return boardRepository.findById(boardId).orElseThrow(() -> new NotFoundException(ErrorCode.BOARD_NOT_FOUND));
+        Optional<BoardEntity> boardEntity = boardRepository.findById(boardId);
+
+        if (boardEntity.isEmpty()) throw new NotFoundException(ErrorCode.BOARD_NOT_FOUND);
+
+        return boardEntity.get();
     }
 
     @Transactional
     public void insertBoard(BoardReq boardReq) throws IOException {
         BoardEntity boardEntity = boardRepository.save(boardReq.toEntity());
+
+        if (boardReq.getFiles() == null) return;
+
         sendMultipartImageToS3(boardReq.getFiles(), boardEntity.getId());
 
         String imageUrl = amazonS3Client.getUrl(BUCKET_NAME, toS3Key(boardEntity.getId())).toString();
@@ -73,7 +84,8 @@ public class BoardService {
         boardEntity.updateTitleAndBody(boardReq);
 
         if (boardReq.getFiles() != null) {
-            amazonS3Client.deleteObject(BUCKET_NAME, boardEntity.getId().toString());
+            if (boardEntity.getImageUrl() != null)
+                amazonS3Client.deleteObject(BUCKET_NAME, boardEntity.getId().toString());
 
             sendMultipartImageToS3(boardReq.getFiles(), boardEntity.getId());
             String imageUrl = amazonS3Client.getUrl(BUCKET_NAME, toS3Key(boardEntity.getId())).toString();
@@ -86,7 +98,8 @@ public class BoardService {
     @Transactional
     public void deleteBoard(Long boardId, Long currentUserId) throws AbstractException {
         BoardEntity boardEntity = findBoardEntity(boardId);
-        amazonS3Client.deleteObject(BUCKET_NAME, toS3Key(boardId));
+        if (boardEntity.getImageUrl() != null)
+            amazonS3Client.deleteObject(BUCKET_NAME, toS3Key(boardId));
 
         if (boardEntity.getUserEntity().getId() != currentUserId) throw new UnAuthorizedException(ErrorCode.NOT_AUTHOR);
 
@@ -102,7 +115,7 @@ public class BoardService {
         amazonS3Client.putObject(new PutObjectRequest(BUCKET_NAME, toS3Key(boardId),  multipartFile.getInputStream(), objectMetadata));
     }
 
-    public String toS3Key(Long boardId) {
+    private String toS3Key(Long boardId) {
         return "images/" + boardId.toString() + ".jpg";
     }
 }

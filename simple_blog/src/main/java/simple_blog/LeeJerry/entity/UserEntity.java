@@ -46,7 +46,8 @@ public class UserEntity {
     private LocalDateTime modifiedDate;
 
     @Builder
-    public UserEntity(String email, String username, String password) {
+    public UserEntity(Long id, String email, String username, String password) {
+        this.id = id;
         this.email = email;
         this.username = username;
         this.password = password;

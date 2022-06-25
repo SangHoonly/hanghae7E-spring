@@ -6,6 +6,7 @@ import static org.mockito.BDDMockito.given;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -24,6 +25,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+import simple_blog.LeeJerry.custom.WithCustomUser;
 import simple_blog.LeeJerry.dto.UserReq;
 import simple_blog.LeeJerry.exception.InvalidException;
 import simple_blog.LeeJerry.service.UserService;
@@ -80,7 +82,7 @@ class UserControllerTest {
     @DisplayName("POST /api/register [로그인X]: 사용자 이름이 없을 경우 400 에러를 반환합니다.")
     public void userRegisterInvalidUsernameTest() throws Exception {
         //given
-        UserReq userReq = UserReq.builder().email("123@455.com").password("1234").build();
+        UserReq userReq = UserReq.builder().email("123@455.com").password("123456!").build();
 
         //when & then
         mvc.perform(post("/api/register")
@@ -90,6 +92,7 @@ class UserControllerTest {
     }
 
     @Test
+    @WithCustomUser
     @DisplayName("POST /api/register [로그인O]: 이미 로그인 되어있는 경우 400 에러를 반환합니다.")
     public void userRegisterAlreadyLoginTest() throws Exception {
         //when & then
@@ -143,12 +146,13 @@ class UserControllerTest {
     }
 
     @Test
-    @WithMockUser
+    @WithCustomUser
     @DisplayName("POST /api/login [로그인O]: 이미 로그인 되어있는 경우 400 에러를 반환합니다.")
     public void userLoginAlreadyLoginTest() throws Exception {
         //when & then
         mvc.perform(post("/api/login"))
-            .andExpect(status().isBadRequest());
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.message").isString());
     }
 
 
