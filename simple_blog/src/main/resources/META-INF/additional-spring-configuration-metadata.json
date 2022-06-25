@@ -1,0 +1,13 @@
+{
+  "properties": [
+    {
+      "name": "url",
+      "type": "java.lang.String",
+      "description": "Description for url."
+    },
+    {
+      "name": "cloud.aws.s3.bucket",
+      "type": "java.lang.String",
+      "description": "Description for cloud.aws.s3.bucket."
+    }
+  ] }

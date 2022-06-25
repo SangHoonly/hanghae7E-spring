@@ -1,0 +1,40 @@
+spring:
+  datasource:
+    url: ${DATABASE_URL}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: ${DATABASE_USER}
+    password: ${DATABASE_PASSWORD}
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    database: mysql
+    properties:
+      hibernate:
+        show_sql : true
+
+jwt:
+  secret: ${SECRET_KEY}
+
+url:
+  server: ${SERVER_URL}
+
+
+cloud:
+  aws:
+    s3:
+      bucket: ${BUCKET}
+    credentials:
+      access-key: ${ACCESS_KEY}
+      secret-key: ${SECRET_KEY}
+    region:
+      static: ${STATIC}
+    stack:
+      auto: false
+
+logging:
+  level:
+    com:
+      amazonaws:
+        util:
+          EC2MetadataUtils: error
